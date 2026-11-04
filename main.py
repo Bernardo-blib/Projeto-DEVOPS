@@ -14,7 +14,7 @@ def cadastrar_produto():
     }
 
     produtos.append(produto)
-    print("Produto cadastrado com sucesso!")
+    print("Produto cadastrado no estoque com sucesso!")
 
 
 def listar_produtos():
