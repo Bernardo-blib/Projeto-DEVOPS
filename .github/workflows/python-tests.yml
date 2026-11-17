@@ -1,5 +1,5 @@
 
-name: Testes Python e Segurança
+name: Testes Python e Seguranca
 
 on:
   push:
@@ -9,10 +9,11 @@ on:
 
 jobs:
   testes:
+    name: Testes Automatizados
     runs-on: ubuntu-latest
 
     steps:
-      - name: Baixar o código
+      - name: Baixar o codigo
         uses: actions/checkout@v4
 
       - name: Configurar Python
@@ -24,11 +25,11 @@ jobs:
         run: python -m unittest -v
 
   sast:
-    name: Análise de Segurança SAST
+    name: Analise de Seguranca SAST
     runs-on: ubuntu-latest
 
     steps:
-      - name: Baixar o código
+      - name: Baixar o codigo
         uses: actions/checkout@v4
 
       - name: Configurar Python
@@ -39,7 +40,7 @@ jobs:
       - name: Instalar Bandit
         run: python -m pip install bandit
 
-      - name: Executar análise SAST
+      - name: Executar analise SAST
         run: bandit -r . -x ./test_main.py
 
   dast:
@@ -73,8 +74,11 @@ jobs:
 
       - name: Executar OWASP ZAP
         run: |
+          mkdir -p relatorios
+          chmod 777 relatorios
+
           docker run --rm --network host \
-            -v "$PWD:/zap/wrk/:rw" \
+            -v "$PWD/relatorios:/zap/wrk/:rw" \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
             -t http://127.0.0.1:8000/ \
@@ -87,5 +91,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: relatorio-dast
-          path: relatorio-dast.html
-          if-no-files-found: warn
+          path: relatorios/relatorio-dast.html
+          if-no-files-found: error
