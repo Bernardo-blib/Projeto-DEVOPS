@@ -41,3 +41,51 @@ jobs:
 
       - name: Executar análise SAST
         run: bandit -r . -x ./test_main.py
+
+  dast:
+    name: Analise de Seguranca DAST
+    runs-on: ubuntu-latest
+    needs: [testes, sast]
+
+    steps:
+      - name: Baixar o codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Iniciar API
+        run: |
+          python app.py &
+          echo $! > api.pid
+
+      - name: Verificar API
+        run: |
+          for i in {1..15}; do
+            if curl --fail http://127.0.0.1:8000/; then
+              exit 0
+            fi
+            sleep 2
+          done
+          exit 1
+
+      - name: Executar OWASP ZAP
+        run: |
+          docker run --rm --network host \
+            -v "$PWD:/zap/wrk/:rw" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py \
+            -t http://127.0.0.1:8000/ \
+            -m 1 \
+            -I \
+            -r relatorio-dast.html
+
+      - name: Publicar relatorio DAST
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-dast
+          path: relatorio-dast.html
+          if-no-files-found: warn
