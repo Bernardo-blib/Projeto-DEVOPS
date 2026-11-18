@@ -9,7 +9,7 @@ class EstoqueHandler(BaseHTTPRequestHandler):
         if self.path == "/":
             dados = {
                 "sistema": "Sistema de Estoque",
-                "status": "online"
+                "status": "execeutado"
             }
 
             resposta = json.dumps(dados).encode("utf-8")
